@@ -25,6 +25,7 @@ namespace FlightBooking.Controllers
     {
         private const string LocalLoginProvider = "Local";
         private ApplicationUserManager _userManager;
+        private ApplicationRoleManager _AppRoleManager;
 
         public AccountController()
         {
@@ -46,6 +47,14 @@ namespace FlightBooking.Controllers
             private set
             {
                 _userManager = value;
+            }
+        }
+
+        protected ApplicationRoleManager AppRoleManager
+        {
+            get
+            {
+                return _AppRoleManager ?? Request.GetOwinContext().GetUserManager<ApplicationRoleManager>();
             }
         }
 
@@ -264,7 +273,7 @@ namespace FlightBooking.Controllers
                 ClaimsIdentity cookieIdentity = await user.GenerateUserIdentityAsync(UserManager,
                     CookieAuthenticationDefaults.AuthenticationType);
 
-                AuthenticationProperties properties = ApplicationOAuthProvider.CreateProperties(user.UserName);
+                AuthenticationProperties properties = ApplicationOAuthProvider.CreateProperties(user.UserName,user.Roles,user.Id);
                 Authentication.SignIn(properties, oAuthIdentity, cookieIdentity);
             }
             else
@@ -335,6 +344,15 @@ namespace FlightBooking.Controllers
             if (!result.Succeeded)
             {
                 return GetErrorResult(result);
+            }
+
+            var roleToAssign = "AppUser";
+
+            IdentityResult addResult = await this.UserManager.AddToRoleAsync(user.Id, roleToAssign);
+
+            if (!addResult.Succeeded)
+            {
+                return GetErrorResult(addResult);
             }
 
             return Ok();
