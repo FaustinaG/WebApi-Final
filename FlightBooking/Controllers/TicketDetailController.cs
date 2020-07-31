@@ -38,6 +38,36 @@ namespace FlightBooking.Controllers
                     }
 
                     ctx.SaveChanges();
+                    IList<TicketDetailViewModel> ticketdetails = null;
+                    var t = new TicketDetailViewModel();
+
+                    ticketdetails = (from flight in ctx.Flights
+                                     join flightDetail in ctx.FlightDetails
+                                     on flight.Id equals flightDetail.FlightId
+                                     join flightSchedule in ctx.FlightScheduleDetails
+                                     on flightDetail.Id equals flightSchedule.FlightDetailId
+                                     where flightSchedule.Id == tickets.FlightScheduleDetailId
+                                     select new TicketDetailViewModel
+                                     {
+                                         FlightName = flight.FlightName,
+                                         JourneyDate = flightSchedule.JourneyDate,
+                                         FromCity = flightDetail.FromCity,
+                                         ToCity = flightDetail.ToCity,
+                                         Price = flightSchedule.Price,
+                                         PassengerCount = ticket.PassengerCount,
+                                         TotalFare = ticket.TotalFare,
+                                         BookingStatus = ticket.BookingStatus.ToString(),
+                                         Id = tickets.Id,
+                                         Departure = flightDetail.Departure,
+                                         Arrival = flightDetail.Arrival
+                                     }).ToList<TicketDetailViewModel>();
+
+                    CreatioLogin login = new CreatioLogin("http://localhost:86/", "Supervisor", "Supervisor");
+                    var loginRequest = login.TryLogin();
+
+                    CreatioLogin logins = new CreatioLogin("http://localhost:86/");
+                    logins.CallWebService(loginRequest, ticketdetails);
+
                     return Json(new { id = tickets.Id });
                 }
             }

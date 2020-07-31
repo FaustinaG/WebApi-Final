@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Web;
 using System.Web.Http;
 using System.Web.Http.Cors;
 
@@ -18,6 +19,12 @@ namespace FlightBooking.Controllers
             try
             {
                 IList<FlightDetailViewModel> flights = null;
+
+                CreatioLogin login = new CreatioLogin("http://localhost:86/", "Supervisor", "Supervisor");
+                var loginrequest = login.TryLogin();
+                CreatioLogin logins = new CreatioLogin("http://localhost:86/");
+                //var token = logins.CallGetMethod(loginrequest);
+                string token = logins.CallWebApi("fg@gmail.com", "Newuser@1").ToString();
 
                 using (var ctx = new BookingFlightEntities())
                 {
@@ -37,8 +44,12 @@ namespace FlightBooking.Controllers
                                    ToCity = flightDetail.ToCity,
                                    Price = flightSchedule.Price,
                                    SeatAvailability = flightSchedule.SeatAvailability,
+                                   token = token
                                }).ToList<FlightDetailViewModel>();
                 }
+
+                //CreatioLogin login = new CreatioLogin("http://localhost:86/", "Supervisor", "Supervisor");
+               // login.TryLogin();
 
                 if (!flights.Any())
                 {
@@ -46,6 +57,22 @@ namespace FlightBooking.Controllers
                 }
 
                 return Ok(flights);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
+        }
+
+
+        [Route("api/FlightDetail/GetToken")]
+        public IHttpActionResult GetToken(string Token)
+        {
+            try
+            {
+                var session = HttpContext.Current.Session;
+                session["accessToken"] = Token;
+                return Ok();
             }
             catch (Exception ex)
             {
@@ -67,7 +94,7 @@ namespace FlightBooking.Controllers
                                on flight.Id equals flightDetail.FlightId
                                join flightSchedule in ctx.FlightScheduleDetails
                                on flightDetail.Id equals flightSchedule.FlightDetailId
-                               where flightDetail.Id == id
+                               where flightSchedule.Id == id
                                select new FlightDetailViewModel
                                {
                                    Id = flightSchedule.Id,

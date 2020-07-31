@@ -26,6 +26,10 @@ namespace FlightBooking.Models
         public string ToCity { get; set; }
         public decimal Price { get; set; }
         public int Id { get; set; }
+        [JsonConverter(typeof(OnlyTimeConverter))]
+        public DateTime Departure { get; set; }
+        [JsonConverter(typeof(OnlyTimeConverter))]
+        public DateTime Arrival { get; set; }
 
         [ForeignKey("FlightDetailId")]
         public FlightDetailViewModel FlightDetail { get; set; }

@@ -13,4 +13,8 @@ namespace FlightBooking.Models
         public int FlightId { get; set; }
         public int FlightIdTobeCanceled { get; set; }
     }
+    public class RootObject
+    {
+        public string Token { get; set; }
+    }
 }

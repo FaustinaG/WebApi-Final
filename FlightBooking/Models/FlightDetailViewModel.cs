@@ -29,6 +29,7 @@ namespace FlightBooking.Models
         public int Id { get; set; }
         public int FlightId { get; set; }
         public int FlightIdTobeCanceled { get; set; }
+        public string token { get; set; }
     }
 
     public class OnlyDateConverter : IsoDateTimeConverter
